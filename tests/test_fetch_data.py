@@ -50,3 +50,13 @@ def flat_ut_error():
     api = FetchData(base_url="b", user_agent="u")
     with pytest.raises(KeyError):
         api.flat_ut(data)
+
+def test_trondheim_forecast(monkeypatch):
+    sample = {"properties": {"timeseries": [{"x":9}]}}
+    dummy = DummyResponse(sample, 200)
+    monkeypatch.setenv("BASE_URL", "https//api.mey.no/weatherapi/locationforcast/2.0")
+    monkeypatch.setenv("USER_AGENT", "agent")
+    monkeypatchsetattr(requests, "get", lambda *args, **kwargs: dummy)
+    api = FetchData(base_url=os.getenv("BASE_URL"), user_agent=os.getenv("USER_AGENT"))
+    df = api.trondheim_forcast()
+    assert list(df["x"]) == [9]
