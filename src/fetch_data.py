@@ -1,5 +1,14 @@
 import requests
 import pandas as pd
+import os 
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join(os.path.dirname(__file__), os.pardir, ".env")
+load_dotenv(dotenv_path)
+
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    raise ValueError("API_KEY amngler. Legg til i .env")
 
 class FetchData:
     """
@@ -21,7 +30,10 @@ class FetchData:
         if not user_agent:
             raise ValueError("user_agent kan ikke være tom")
         self.base_url=base_url.rstrip("/")
-        self.headers = {"User-Agent": user_agent}
+        self.headers = {
+            "User-Agent": user_agent,
+            "x-api-key": API_KEY
+        }
     
     def hent_data(self, endpoint, params):
         """
@@ -66,3 +78,12 @@ class FetchData:
                 raise KeyError(f"Nøkkel {nøkkel} mangler i API-data")
             node = node[nøkkel]
         return pd.json_normalize(node, sep="_")
+
+
+    def trondheim_forcast(self):
+        """
+        Henter kompakt værdata for Trondheim
+        """
+        params = {"lat": 63.4295, "lon": 10.3951}
+        data = self.hent_data(endpoint="compcat",params=params)
+        return self.flatut(data)
