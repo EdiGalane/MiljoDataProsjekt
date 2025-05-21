@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-class MetAPI:
+class FetchData:
     """
     Klasse for å hente og flate ut JSON-data fra MET.no Locationforcast API
     """
@@ -23,6 +23,46 @@ class MetAPI:
         self.base_url=base_url.rstrip("/")
         self.headers = {"User-Agent": user_agent}
     
-    def hent_data(self, endpoint, params)
+    def hent_data(self, endpoint, params):
+        """
+        Henter JSON-data fra MET.no API
 
-    def flat_ut(self, data, path)
+        Args: 
+            endpoint(str): Sti eller base_url
+            params (dict): URL-parametre som dictionary
+        
+        Returns:
+            dict: Deserialisert JSON-respons
+        
+        Raise:
+            requets.HTTPError: Ved HTTP-feil.
+            ValueError: Ved feil under JSON-parsing
+        """
+        url = f"{self.base_url}/{edpoint-lstrip('/')}"
+        try:
+            resp = requests.get(url, params = params, headers = self.headers)
+            resp.raise_for_status()
+            return resp.json()
+        except ValueError as e:
+            raise ValueError(f"Kunne ikke parse JSON: {e}")
+
+    def flat_ut(self, data, path):
+        """
+        Flater ut en nested liste i JSON til flat DataFrame
+
+        Args:
+            data (dict): JSON-data fra hent_data()
+            path (str): punktum separert sti til listen som skal flates ut
+        
+        retruns:
+            pd.dataFrame: flat DataFrame med kolonnenavn samlet med '_'
+        
+        raise: 
+            keyError: dersom en nøkkel i sti ikke finnes i data
+        """
+        node = data 
+        for nøkkel in path.split("."):
+            if nøkkel not in node:
+                raise KeyError(f"Nøkkel {nøkkel} mangler i API-data")
+            node = node[nøkkel]
+        return pd.json_normalize(node, sep="_")
