@@ -87,3 +87,36 @@ class FetchData:
         params = {"lat": 63.4295, "lon": 10.3951}
         data = self.hent_data(endpoint="compcat",params=params)
         return self.flatut(data)
+
+    def save_raw(self, data, filename, data_dir="data"):
+        """
+        lagre rå JSON data til en fil i data_dir.
+
+        args:
+            data: rå JSON som skal lagres
+            Filename: filnavn med .json endelse 
+            data_dir: katalog for lagring (data)
+        """
+        os.makedirs(data_dir, exist_ok=True)
+        path = os.path.join(data_dir, filename)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data,f,ensure_ascii=False, indent=2)
+        
+    def save_forecast_csv(self, df, filename, data_dir="data"):
+        """
+        lagre flated forcast DataFrame som CSV i data_dir
+
+        Args 
+            df: dataframe av forecast
+            filename: filnavn med .csvendelse
+            data_dir: katalog for lagring(Data)
+        
+        Raises:
+            ValueError: dersom dataframe er tom
+        """
+        os.makedirs(data_dir, exist_ok=True)
+        if df.empty:
+            raise ValueError("Forecast dataframe er tom")
+        path = os.path.join(data_dir, filename)
+        df.to_csv(path, index=False)
+        
