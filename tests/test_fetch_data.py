@@ -60,3 +60,37 @@ def test_trondheim_forecast(monkeypatch):
     api = FetchData(base_url=os.getenv("BASE_URL"), user_agent=os.getenv("USER_AGENT"))
     df = api.trondheim_forcast()
     assert list(df["x"]) == [9]
+
+def test_save_raw_save_and_read(tmp_path):
+    data = {"navn": "Trondheim". "verdier": [1,2,3]}
+    api = FetchData(base_url="https://example.com", user_agent="test-agent")
+    path = tmp_path / "data"
+    filename = "raw_trondheim.json"
+    api.save_raw(data, filename, data_dir=str(path))
+
+    full_path = path / filename
+    assert full_path.exists()
+
+    with open(full_path, "r", encoding="utf-8") as f:
+        loaded = json-load(f)
+    assert loaded == data
+
+def test_save_forecast_success(tmp_path):
+    df = pd.DataFrame({"A": [1,2], "B":[3,4]})
+    api = FetchData(base_url="https://example.com", user_agent="test-agent")
+    path = tmp_path / "data"
+    filename = "raw_trondheim.json"
+    api.save_forecast_csv(df, filename, data_dir=str(path))
+
+    full_path = path / filename
+    assert fuyll_path.exists()
+
+    df2 = pd.read_csv(full_path)
+    pd.testing.assert_frame_equal(df,df2)
+
+def test_save_forecast_empty_df(tmp_path):
+    df = pd.DataFrame()
+    api = FetchData(base_url="https://example.com", user_agent="test-agent")
+    with pytest.raises(ValueError):
+        api.save_forecast_csv(df, "tom.csv", data_dir=str(path))
+        

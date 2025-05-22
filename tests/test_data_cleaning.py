@@ -95,9 +95,33 @@ def test_filtrer_temp_over_success():
     out = dr.filtrer_temp_over(15)
     assert list(out["Temperatur"]) == [20]
 
-def test_tiltrer_temp_over_missing():
+def test_filtrer_temp_over_missing():
     df = pd.DataFrame({"X":[1]})
     dr = DataRensing(df)
     with pytest.raises(KeyError):
         dr.filtrer_temp_over(0)
+
+def test_save_cleaned_success(tmp_path):
+    df = pd.DataFrame({
+        "Tid":["2024-01-01 12:00". "2024-01-01 13:00"],
+        "Temperatur": [1.1, 2.2]
+        "Fuktighet": [85, 90]
+    })
+    rense = DataRensing(df)
+    filename="data_clean.csv"
+    data_dir = tmp_path / "data"
+    rense.save_cleaned(filename, data_dir=str(data_dir))
+    path = data_dir / filename
+    assert path.exists()
+
+    df2 = pd.read_csv(path)
+    pd.testing.assert_frame_equal(df,df2)
+
+def test_save_cleaned_empty_df(tmp_path):
+    df = pd.DataFrame()
+    rense = DataRensing(df)
+
+    with pytest.raises(ValueError):
+        rense.save_cleaned("data_clean.csv", data_dir=str(tmp_path))
+        
         
