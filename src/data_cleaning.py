@@ -112,9 +112,9 @@ class DataRensing:
         df_res = pd.DataFrame()
         df_res["Tid"] = self.hent_tid()
         df_res["Temperatur"] = self.hent_temperatur()
-        df_res["Fuktighet"] = self.hent_fuktighet
-        df_res["Trykk"] = self.hent_trykk
-        df_res["Vindhastighet"] = self.hent_vind
+        df_res["Fuktighet"] = self.hent_fuktighet()
+        df_res["Trykk"] = self.hent_trykk()
+        df_res["Vindhastighet"] = self.hent_vind()
         return df_res
 
 
@@ -229,3 +229,20 @@ class DataRensing:
         if "Temperatur" not in self._df.columns:
             raise KeyError("Kolonnen 'Temperatur' mangler for filtrering")
         return self._df[self._df["Temperatur"] > temp_grense].copy()
+
+    def save_cleaned(self, filename, data_dir = "data"):
+        """
+        Lagre den ferdig rensede DataFrame som CSV i data_dir.
+
+        Args:
+            filename: filnavn med .csv-endelse
+            data_dir: katalog for lagring (data)
+        
+        raise:
+            ValueError: dersom df er tom
+        """
+        os.makedirs(data_dir, exist_ok = True)
+        if self.df.eampty:
+            raise ValueError("renset dataframe er tom, ingenting å lagre")
+        path = os.path.join(data_dir, filename)
+        self.df.to_csv(path,index=False)
