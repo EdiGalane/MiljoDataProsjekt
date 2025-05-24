@@ -30,12 +30,12 @@ class DataPrediksjon:
             målevariabel: kolonnen som skal predikeres
             test_størrelse: andel av data brukt til testing, setter som =0.2
         """
-        self.df=DataRensing.bygg_renset_dataframe()
+        self.df = df.copy()
 
         if målvariabel not in df.columns:
-            raise ValueError(f"Målevaribelen {målevaribel} finnes ikke")
+            raise ValueError(f"Målevaribelen {målevariabel} finnes ikke")
         
-        self.målevaribel = målevaribel
+        self.målevariabel = målevariabel
         X = self.df.drop(columns=[målevariabel, "Tid"], errors="ignore")
         y = self.df[målevariabel]
 
@@ -53,6 +53,7 @@ class DataPrediksjon:
 
         self.modeller = {}
         self.resultater = {}
+        self.modell = None
 
     def tren_lineær_modell(self):
         """
