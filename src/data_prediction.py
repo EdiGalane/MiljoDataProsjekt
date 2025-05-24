@@ -1,14 +1,17 @@
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression, RANSACRegressor
-from sklearn.preprocessing import PolynomialFeature, StandardScaler, OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from typing import Tuple, Union
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from data_vizualisation import DataVisualisering
+from data_cleaning import DataRensing
 
 class DataPrediksjon:
     """
@@ -27,12 +30,12 @@ class DataPrediksjon:
             målevariabel: kolonnen som skal predikeres
             test_størrelse: andel av data brukt til testing, setter som =0.2
         """
+        self.df=DataRensing.bygg_renset_dataframe()
+
         if målvariabel not in df.columns:
             raise ValueError(f"Målevaribelen {målevaribel} finnes ikke")
         
-        self.df= df.dropna() 
         self.målevaribel = målevaribel
-
         X = self.df.drop(columns=[målevariabel, "Tid"], errors="ignore")
         y = self.df[målevariabel]
 
