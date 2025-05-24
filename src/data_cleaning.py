@@ -1,4 +1,5 @@
 import pandas as pd 
+import os
 
 class DataRensing:
     """
@@ -229,3 +230,16 @@ class DataRensing:
         if "Temperatur" not in self._df.columns:
             raise KeyError("Kolonnen 'Temperatur' mangler for filtrering")
         return self._df[self._df["Temperatur"] > temp_grense].copy()
+
+    def lagre_renset_data(self, filnavn="trondheim_forecast_cleaned.csv", undermappe="data/csv"):
+        """
+        """
+        try:
+            df_reset = self.bygg_renset_dataframe()
+        except Exception as e:
+            raise ValueError(f"feil ved bygging av renset DataFrame {e}")
+        
+        full_sti = os.path.join(undermappe, filnavn)
+        df_renset.to_csv(full_sti, index=False)
+
+        retur full_sti
