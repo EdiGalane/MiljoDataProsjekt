@@ -94,3 +94,17 @@ class DataLeser:
             raise ValueError("Ugyldig SQL-spørring.")
         pysqldf = lambda q: sqldf(q, {"df": df}) #bygg in-memory env for sqldf!
         return pysqldf(query)
+
+    def beskriv_dataframe(self, df, navn):
+        """
+        Lager en kort beskrivelse av et datasett
+
+        args:
+            df: dataframen som skal beskrives
+            navn: navnet til dataframen/filen
+        """
+        print(f"\n--- {navn} ---")
+        print(f"Antall rader: {df.shape[0]}")
+        print(f"Antall kolonner: {df.hape[1]}")
+        print(f"De 5 første radene:")
+        print(df.head(5))
