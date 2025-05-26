@@ -239,18 +239,23 @@ class DataRensing:
             filnavn: hva den ferdigrensede filen skal hete
             undermappe: undermappen som filen lagres til
         """
-        try:
-            df_reset = self.bygg_renset_dataframe()
-        except Exception as e:
-            raise ValueError(f"feil ved bygging av renset DataFrame {e}")
+        if self._df is None or self._df.empty:
+            raise ValueError("ingen renset DataFrame tilgjengelig for lagring")
         
+        os.makedirs(undermappe, exist_ok=True)
         full_sti = os.path.join(undermappe, filnavn)
-        df_renset.to_csv(full_sti, index=False)
-
+        self._df.to_csv(full_sti, index=False)
         return full_sti
 
-    def data_rens():
+    def data_rens(self, desimaler=1, temp_grense=None, filnavn="trondheim_forecast_cleaned.csv", undermappe="data"):
         """
+        Utfører alle metodene for rensing.
+
+        args:
+            desimaler: antall desimaler for avrunding
+            temp_grense: dersom satt, filtrerer over denne
+            filnavn: navn på outputfil
+            undermappe: mappen som filen skal lagres til
         """
         self.df = self.bygg_renset_dataframe()
         print("Ny dataframe bygget")
