@@ -242,4 +242,4 @@ class DataRensing:
         full_sti = os.path.join(undermappe, filnavn)
         df_renset.to_csv(full_sti, index=False)
 
-        retur full_sti
+        return full_sti
