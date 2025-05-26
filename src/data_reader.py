@@ -90,7 +90,7 @@ class DataLeser:
         Reises:
             ValueError: dersom query er tom
         """
-        if not query or not isinstance(query, self):
+        if not query or not isinstance(query, str):
             raise ValueError("Ugyldig SQL-spørring.")
         pysqldf = lambda q: sqldf(q, {"df": df}) #bygg in-memory env for sqldf!
         return pysqldf(query)
