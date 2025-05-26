@@ -113,9 +113,9 @@ class DataRensing:
         df_res = pd.DataFrame()
         df_res["Tid"] = self.hent_tid()
         df_res["Temperatur"] = self.hent_temperatur()
-        df_res["Fuktighet"] = self.hent_fuktighet
-        df_res["Trykk"] = self.hent_trykk
-        df_res["Vindhastighet"] = self.hent_vind
+        df_res["Fuktighet"] = self.hent_fuktighet()
+        df_res["Trykk"] = self.hent_trykk()
+        df_res["Vindhastighet"] = self.hent_vind()
         return df_res
 
 
