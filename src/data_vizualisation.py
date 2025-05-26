@@ -11,7 +11,7 @@ class DataVisualisering:
     def __init__(self, df,):
         self.df = df
     
-    def plott_tidserie(self, kol, filnavn):
+    def plott_tidserie(self, kol, filnavn=None, save=True):
         """
         Plotter en tidsserie for en gitt kolonne.
 
@@ -30,10 +30,14 @@ class DataVisualisering:
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/tidsserie_{kol}.png")
-        plt.close()
+
+        if save:
+            plt.savefig(filnavn or f"bilder/tidsserie_{kol}.png")
+            plt.close()
+        else:
+            plt.show()
     
-    def plott_sammenheng(self, x, y, vis_outliers, thresh, filnavn):
+    def plott_sammenheng(self, x, y, vis_outliers, thresh, filnavn=None, save=True):
         """
         plotter sammenhengen mellom to varaibler ved bruk av scatterplot.
         valgfritt fremheving av outliers som røde punkter med kryss.
@@ -71,10 +75,14 @@ class DataVisualisering:
         plt.grid(True)
         plt.legend()
         plit.tight_layout()
-        plt.savefig(filnavn or f"bilder/sammenheng_{x}_{y}.png")
-        plt.close()
 
-    def plott_histogram(self, kol, filnavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/sammenheng_{x}_{y}.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def plott_histogram(self, kol, filnavn=None, save=True):
         """
         plotter histogram for fordeling til en varaibel
 
@@ -91,10 +99,14 @@ class DataVisualisering:
         plt.xlabel(kol)
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/histogram_{kol}.png")
-        plt.close()
 
-    def plott_boxplot(self, gruppe, verdi, filenavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/histogram_{kol}.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def plott_boxplot(self, gruppe, verdi, filenavn=None, save=True):
         """
         plotter et boxplot for å sammenligne fordelingen av en verdi per kategori
 
@@ -111,10 +123,14 @@ class DataVisualisering:
         plt.title(f"Fordeling av {verdi} per {gruppe}")
         pli.grid(True, axis="y")
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/boxplot_{verdi}_per_{gruppe}.png")
-        plt.close()
 
-    def plott_korrelasjonsmatrise(self, filnavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/boxplot_{verdi}_per_{gruppe}.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def plott_korrelasjonsmatrise(self, filnavn=None, save=True):
         """
         plotter heatmap av korrelasjonsmatrisen for alle numeriske varaibler.
 
@@ -128,10 +144,14 @@ class DataVisualisering:
         plt.xticks(rotation=45, ha="right")
         plt.yticks(rotation=0)
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/korrelasjonsmatrise.png")
-        plt.close()
 
-    def plott_pairplot(self, hue=None, filnavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/korrelasjonsmatrise.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def plott_pairplot(self, hue=None, filnavn=None, save=True):
         """
         lager et pairplot for sammenhenger og fordelinger mellom numeriske verdier
 
@@ -141,10 +161,14 @@ class DataVisualisering:
         """
         sns.pairplot(self.df, hue=hue)
         plt.suptitle("sammenhenger mellom numeriske variabler", y = 1.02)
-        plt.savefig(filnavn or f"bilder/pairplot_numetriske_verdier.png")
-        plt.close()
 
-    def plott_jointplot(self, x, y, hue=None, filnavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/pairplot_numetriske_verdier.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def plott_jointplot(self, x, y, hue=None, filnavn=None, save=True):
         """
         plotter et jointplot som kombinerer scatterplot og fordelingsgrafer
 
@@ -155,11 +179,15 @@ class DataVisualisering:
             filnavn: navn på filen
         """
         sns.jointplot(data=self.df, x=x, y=y, hue=hue, kind="scatter")
-        plt.savefig(filnavn or f"bilder/scatter&fordeling_{x}_vs_{y}.png")
-        plt.close()
+
+        if save:
+            plt.savefig(filnavn or f"bilder/scatter&fordeling_{x}_vs_{y}.png")
+            plt.close()
+        else:
+            plt.show()
 
 
-    def plott_trend_vs_rådata(self, kol, vindu=7, filnavn):
+    def plott_trend_vs_rådata(self, kol, vindu=7, filnavn=None, save=True):
         """
         Plotter rådata og glidende gjennomsnitt for en kolonne i samme figur
 
@@ -178,9 +206,14 @@ class DataVisualisering:
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/trend_vs_rådata_for_{kol}.png")
 
-    def visualiser_manglende_verdier(self, filnavn):
+        if save:
+            plt.savefig(filnavn or f"bilder/trend_vs_rådata_for_{kol}.png")
+            plt.close()
+        else:
+            plt.show()
+
+    def visualiser_manglende_verdier(self, filnavn=None, save=True):
         """
         Visualiserer hvor i datasettet det mangler verdier ved bruk av missingno 
         biblioteket.
@@ -191,7 +224,12 @@ class DataVisualisering:
         import missingno as missingnomsno.matrix(self.df)
         plt.title("Visualiserer manglende verdier")
         plt.tight_layout()
-        plt.savefig(filnavn or f"bilder/manglende_verdier.png")
+
+        if save:
+            plt.savefig(filnavn or f"bilder/manglende_verdier.png")
+            plt.close()
+        else:
+            plt.show()
 
     def interaktiv_plot_trend(self, kol):
         """
