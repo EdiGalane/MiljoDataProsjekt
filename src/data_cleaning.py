@@ -233,6 +233,11 @@ class DataRensing:
 
     def lagre_renset_data(self, filnavn="trondheim_forecast_cleaned.csv", undermappe="data/csv"):
         """
+        Lagrer den rensede dataen til data mappen.
+
+        args:
+            filnavn: hva den ferdigrensede filen skal hete
+            undermappe: undermappen som filen lagres til
         """
         try:
             df_reset = self.bygg_renset_dataframe()
