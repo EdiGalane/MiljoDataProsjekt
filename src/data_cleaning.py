@@ -248,3 +248,46 @@ class DataRensing:
         df_renset.to_csv(full_sti, index=False)
 
         return full_sti
+
+    def data_rens():
+        """
+        """
+        self.df = self.bygg_renset_dataframe()
+        print("Ny dataframe bygget")
+
+        dups, nans = self.rense_stats()
+        print(f"Antall duplikater: {dups}, Antall manglende verdier: {nans}")
+
+        self._df = self.håndter_manglende_verdier(metode="median")
+        self._df = self.håndter_duplikater(behold=False)
+        print("MAnglende verdier og fuplikater håndtert")
+
+        self._df=self.bearbeid_tid()
+        print("Tid formatert")
+
+        if avrund_kol:
+            try: 
+                self._df = self.avrund_kolonne(avrund_kol, desimaler)
+                print(f"Kolonne {avrund_kol} avrundet til {desimaler} desimaler")
+            except Exception as e:
+                print(f"Feil i avrunding: {e}")
+        else:
+            pass
+
+        if temp_grense is not None:
+            try:
+                self._df = self.filtrer_temp_over(temp_grense)
+                print(f"Filtrert alle rader med Temperatur > {temp_grense}")
+            except Exception as e:
+                print(f"Feil i filtrering: {e}")
+        else:
+            pass
+        
+        try:
+            sti = self.lagre_renset_data(filnavn=filnavn, undermappe=undermappe)
+            print(f"Data lagret til {sti}")
+        except Exception as e:
+            print(f"Feil ved lagring: {e}")
+
+        print("Data er ferdigrenset")
+        return self._df
