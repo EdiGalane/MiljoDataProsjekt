@@ -16,7 +16,7 @@ class DataVisualisering:
         """
         Plotter en tidsserie for en gitt kolonne.
 
-        args: 
+        Args: 
             kol: navn på kolonnen som skal plottes over tid
             filnavn: navn på filen
         """
@@ -45,10 +45,10 @@ class DataVisualisering:
     
     def plott_sammenheng(self, x, y, vis_outliers, thresh, filnavn=None, save=True):
         """
-        plotter sammenhengen mellom to varaibler ved bruk av scatterplot.
+        Plotter sammenhengen mellom to varaibler ved bruk av scatterplot.
         valgfritt fremheving av outliers som røde punkter med kryss.
 
-        args:
+        Args:
             x: kolonne for x-akse
             y: kolonne for y-akse
             vis_outliers: True eller False om outliers skal vises
@@ -94,9 +94,9 @@ class DataVisualisering:
 
     def plott_histogram(self, kol, filnavn=None, save=True):
         """
-        plotter histogram for fordeling til en varaibel
+        Plotter histogram for fordeling til en varaibel
 
-        args:
+        Args:
             kol: navn på kolonnen som skal plottes
             filnavn: navn på filen
         """
@@ -122,9 +122,9 @@ class DataVisualisering:
 
     def plott_boxplot(self, gruppe, verdi, filenavn=None, save=True):
         """
-        plotter et boxplot for å sammenligne fordelingen av en verdi per kategori
+        Plotter et boxplot for å sammenligne fordelingen av en verdi per kategori
 
-        args:
+        Args:
             gruppe: kategorisk variabel
             verdi: numerisk varaibel
             filnavn: navn på filen
@@ -150,9 +150,9 @@ class DataVisualisering:
 
     def plott_korrelasjonsmatrise(self, filnavn=None, save=True):
         """
-        plotter heatmap av korrelasjonsmatrisen for alle numeriske varaibler.
+        Plotter heatmap av korrelasjonsmatrisen for alle numeriske varaibler.
 
-        args:
+        Args:
             filnavn: navn på filen
         """
         corr=self.df.corr(numeric_only=True)
@@ -175,9 +175,9 @@ class DataVisualisering:
 
     def plott_pairplot(self, hue=None, filnavn=None, save=True):
         """
-        lager et pairplot for sammenhenger og fordelinger mellom numeriske verdier
+        Lager et pairplot for sammenhenger og fordelinger mellom numeriske verdier
 
-        args:
+        Args:
             hue: kategorisk variabel for fargekoding
             filnavn: navn på filen
         """
@@ -197,9 +197,9 @@ class DataVisualisering:
 
     def plott_jointplot(self, x, y, hue=None, filnavn=None, save=True):
         """
-        plotter et jointplot som kombinerer scatterplot og fordelingsgrafer
+        Plotter et jointplot som kombinerer scatterplot og fordelingsgrafer
 
-        args:
+        Args:
             x: kolonne for x-akse
             y: kolonne for y-akse
             hue: variabel for fargekoding
@@ -253,7 +253,7 @@ class DataVisualisering:
         Visualiserer hvor i datasettet det mangler verdier ved bruk av missingno 
         biblioteket.
 
-        args:
+        Args:
             filnavn: navn på filen
         """
         import missingno as msno
@@ -277,7 +277,7 @@ class DataVisualisering:
         på den glidende vinduet ved hjelp av en slider, og se hvordan
         trendene endrer seg visuelt i sanntid.
 
-        args:
+        Args:
             kol: kolonnen som sakl visualiseres.
         """
         from matplotlib.widgets import Slider
@@ -368,6 +368,8 @@ def vis_alle_figurer(bildemappe="bilder", kolonner=2, figur_bredde=6):
     Leser alle PNG filer i gitt mappe og viser dem i et rutenett med filnavn som titler.
     Gir tydelige tags for lettere tolkning.
 
+    Siden den ikke bruker 'self' så slipper vi å inkludere i DataVisualisering
+
     Args:
         bildemappe: mappe med lagrede bilder
         Kolonner: antall kol i rutenettet
@@ -391,8 +393,6 @@ def vis_alle_figurer(bildemappe="bilder", kolonner=2, figur_bredde=6):
         axs[i].set_title(f"Figur {i+1}: {filnavn.replace("_", " ").replace(".png", "")}", fontsize=10)
         axs[i].axis("off")
 
-        #print(f"\n### Figur {i+1}: {filnavn.replace("_", " ").replace(".png", "")}")
-        #print(f"![](bilder/{filnavn})")
 
     # Slår av tomme ruter hvis det er flere ruteplasser enn bilder
     for j in range(i+1, len(axs)):

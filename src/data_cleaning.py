@@ -75,7 +75,7 @@ class DataRensing:
         """
         Henter trykkolonnen fra API-datasett
 
-        returns: 
+        Returns: 
             pd:series: kolonne med trykkverdier som float
         """
         kol = "data_instant_details_air_pressure_at_sea_level"
@@ -239,7 +239,7 @@ class DataRensing:
         """
         Lagrer den rensede dataen til data mappen.
 
-        args:
+        Args:
             filnavn: hva den ferdigrensede filen skal hete
             undermappe: undermappen som filen lagres til
         """
@@ -260,7 +260,7 @@ class DataRensing:
         """
         Utfører alle metodene for rensing.
 
-        args:
+        Args:
             desimaler: antall desimaler for avrunding
             temp_grense: dersom satt, filtrerer over denne
             filnavn: navn på outputfil
@@ -275,7 +275,7 @@ class DataRensing:
 
         self._df = self.håndter_manglende_verdier(metode="median")
         self._df = self.håndter_duplikater(behold=False)
-        print("MAnglende verdier og fuplikater håndtert")
+        print("Manglende verdier og fuplikater håndtert")
 
         self._df=self.bearbeid_tid()
         print("Tid formatert")

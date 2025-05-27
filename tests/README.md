@@ -8,6 +8,9 @@ Denne mappen inneholder enhetstester for hver av modulene i "src/"-mappen. Følg
 - Feilhåntering og robusthet er beholdt (negative tester)
 - Prosjektet følger god programvarepraksis for applikasjonsutvikling
 - Vise forståelse for Arrange - Act - Assert prinsippet
+    - Arrange: initialiser testobjekt
+    - Act: kjør ønsket metode
+    - Assert: sjekk om resultat er korrekt
 
 ## Dekning:
 
@@ -16,6 +19,13 @@ Testfilene dekker:
 - Negativ scenario (negativ-test): forventet oppførsel ved feil-input eller manglende/ugyldige data
 - setUp() brukt for initialisering av klassen
 - assertEqual, assertRaises, assertTrue, assertIsNone, osv...  
+
+## Unittest:
+Unittest er et modulbasert testverktøy i python som lar oss bruke:
+- TestCase klasser for gruppering av relaterte tester.
+- Overnevnte assert... metoder som sjekker forventet oppførsel.
+- setUp og tearDown for initialisering og deretter opprydding
+- TextTestRunner og TestLoader for automatisk oppdagelser og kjøring av tester
 
 ## Struktur:
 Testene er plassert i "tests/unit/", altså en test fil per src/ modul

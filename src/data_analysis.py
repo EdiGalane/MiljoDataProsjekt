@@ -11,7 +11,7 @@ class DataAnalyse:
         """
         Initialiserer analysemodulen med en numerisk DataFrame
 
-        args:
+        Args:
             df: renset pandas DataFrame med numeriske miljødata.
                 det er forvented at dette er cleaned data til Trondhiem Forecast
         """
@@ -30,7 +30,7 @@ class DataAnalyse:
         """
         Beregner median for hver kolonne
 
-        Returns;
+        Returns:
             pd.Series: Medianverdier per varaibel
         """
         return self.df.median()
@@ -55,14 +55,14 @@ class DataAnalyse:
         """
         Beregner korrelasjonskoeffisient mellom to valgte kolonner
 
-        args:
+        Args:
             kol1: navn på første kolonne
             kol2: navn på andre kolonne
 
-        returns:
+        Returns:
             float. korrelasjonskoeffiseient
         
-        raises:
+        Raises:
             ValueError: dersom en eller begge kolonner ikke finnes i dataframe
         """
         if kol1 in self.df.columns and kol2 in self.df.columns:
@@ -72,7 +72,7 @@ class DataAnalyse:
 
     def identifiser_outliers(self, threshold=3.0):
         """
-        identifiserer de radene med verdier "score" over terskelverdiern "threshold"
+        Identifiserer de radene med verdier "score" over terskelverdiern "threshold"
 
         Args:
             threshold: terskel for score. default er på 3.0
@@ -90,11 +90,11 @@ class DataAnalyse:
         """
         Returnerer en rullende gjennomsnitt for en spesifisert kolonne.
 
-        args:
+        Args:
             kol: navn på kolonnen som skal analyseres
             vindu: størelse på glidende vindu
         
-        returns:
+        Returns:
             union: glidende gjennomsnitt som Series
         """
         if kol in self.df.columns:

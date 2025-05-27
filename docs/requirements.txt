@@ -28,3 +28,7 @@ urllib3==2.4.0
 pandasql==0.7.3
 missingno==0.5.2
 ipympl==0.9.3
+jupyter==1.0.0
+notebook==7.2.0
+ipykernel==6.29.4
+nbformat==5.10.4

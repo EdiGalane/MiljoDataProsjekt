@@ -10,6 +10,7 @@ class DataLeser:
     def __init__(self,data_dir):
         """
         Initiliserer DataLeser med katalogen der data ligger.
+        
         Args:
             data_dir: Sti til mappen som inneholder datafiler
 
@@ -59,14 +60,14 @@ class DataLeser:
         """
         Leser en JSON fil fra datadir til en Dataframe
 
-        args:
+        Args:
             filnavn: Navnet pp JSON-filen
             **kwargs: parametre til pd.read_json
         
-        returns:
+        Returns:
             pd.DataFrane: innholdet av JSOn-filen
         
-        raise:
+        Raise:
             FileNotFoundERROR: dersom filen ikke finnes
             ValueError: dersom JSOn-parsing feiler
         """
@@ -80,7 +81,7 @@ class DataLeser:
         """
         Utfører en SQL-spørring mot DataFrame ved hjelp av pandasql.
 
-        args:
+        Args:
             df: dataframen som vi kjører sql spørringen mot
             query: sql-spørring som skal kjøres, eksempler: "SELECT * FROM df WHERE ...".
         
@@ -99,7 +100,7 @@ class DataLeser:
         """
         Lager en kort beskrivelse av et datasett
 
-        args:
+        Args:
             df: dataframen som skal beskrives
             navn: navnet til dataframen/filen
         """

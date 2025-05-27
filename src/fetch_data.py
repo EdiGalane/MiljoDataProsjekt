@@ -10,12 +10,12 @@ class FetchData:
 
     def __init__(self, base_url=None, user_agent=None):
         """
-        initialiserer MetApi med base-URL og User-Agent
+        initialiserer FetchData med base-URL og User-Agent
 
         Args:
             base_url(str): grunn_URL til MET.no API
             user_agent(str): påkrevd HTTP-header for legitim forespørsel.
-        raise:
+        Raise:
             ValueError: dersom base url eller user agent er tomme
         """
         load_dotenv()
@@ -64,10 +64,10 @@ class FetchData:
             data (dict): JSON-data fra hent_data()
             path (str): punktum separert sti til listen som skal flates ut
         
-        retruns:
+        Retruns:
             pd.dataFrame: flat DataFrame med kolonnenavn samlet med '_'
         
-        raise: 
+        Raise: 
             keyError: dersom en nøkkel i sti ikke finnes i data
         """
         node = data 
