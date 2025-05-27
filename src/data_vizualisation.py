@@ -348,7 +348,7 @@ class DataVisualisering:
         plt.xlabel(x)
         plt.ylabel(y)
         plt.grid(True)
-        pli.tight_layout()
+        plt.tight_layout()
 
         if save:
             prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
