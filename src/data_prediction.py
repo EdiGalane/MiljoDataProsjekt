@@ -87,7 +87,6 @@ class DataPrediksjon:
             self.resultater[navn] = {"R^2": r2, "RMSE": rmse}
         return self.resultater
 
-
     def visualiseringsgrunnlag(self):
         """
         Lager et visualiseringsgrunnlag for testsettet med faktisk og predikert verdi
@@ -99,9 +98,7 @@ class DataPrediksjon:
         df_vis = self.X_test.copy()
         df_vis["Faktisk"] = self.y_test.values
         df_vis["Predikert"] = y_pred
-        #df_vis["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
-        df_vis["Dag"] = pd.to_datetime(df_vis["Tid"], format="%Y-%m-%dT%H:%M:%SZ", errors="coerce").dt.date
-
+        df_vis["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
         df_vis["Feil"] = abs(df_vis["Faktisk"] - df_vis["Predikert"])
         df_vis["Dag"] = pd.to_datetime(df_vis["Tid"], errors="coerce").dt.date
         df_vis = df_vis.sort_values(by="Tid")
