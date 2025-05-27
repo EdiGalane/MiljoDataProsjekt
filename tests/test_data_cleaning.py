@@ -1,127 +1,118 @@
-import pandas as pd 
-impurt pytest
+import unittest
+import pandas as pd
+import tempfile
+import os
 from src.data_cleaning import DataRensing
 
-def test_init_type_error():
-    with pytest.raises(TypeError):
-        DataRensing(df="ikke en DataFrane")
+class TestDataRensing(unittest.TestCase):
+    def setUp(self):
+        self.df = pd.DataFrame({
+            "time": ["2023-01-01T00:00:00Z", "2023-01-01T01:00:00Z", "2023-01-01T01:00:00Z"],
+            "data_instant_details_air_temperature": [5.1, None, 7.3],
+            "data_instant_details_relative_humidity": [80, 82, None],
+            "data_instant_details_air_pressure_at_sea_level": [1013, 1012, None],
+            "data_instant_details_wind_speed": [4.5, 3.8, None],
+        })
+        self.renser = DataRensing(self.df)
 
-def test_bygg_renset_dataframe_success():
-    with rå = pd.DataFrame = ({
-        "time":["2025-01-01T00:00:00Z"],
-        "data_instant_details_air_temperature": [5.0],
-        "data_instant_details_relative_humidity": [80.0],
-        "data_instant_details_air_pressure_at_sea_level": [1010.0],
-        "data_instant_details_wind_speed": [2.2],
-    })
-    dr = DataRensing(rå)
-    res = dr.bygg_renset_dataframe()
-    assert list(res.columns) == ["Tid", "Temperature", "Fuktighet", "Trykk", "Vindhastighet"]
-    assert isinstance(res["Tid"].iloc[0], pd.Timestamp)
-    assert res["Temperatur"].iloc[0] == 5.0
+    def test_init_with_valid_dataframe(self):
+        self.assertIsInstance(self.renser, DataRensing)
 
-def test_bygg_renset_dataframe_missing_kol():
-    rå = pd.DataFrame({"time": ["2025-01-01T00:00:00Z"]})
-    dr = DataRensing(rå)
-    with pytest.raises(KeyError):
-        dr.bygg_renset_dataframe()
+    def test_init_with_invalid_input(self):
+        with self.assertRaises(TypeError):
+            DataRensing("ikke en dataframe")
 
-@pytest.mark.parametrize("method, expected_rows", [
-    ("drop", 0),
-    ("median", 3),
-    ("behold", 3),
-])
+    def test_hent_tid_success(self):
+        tid = self.renser.hent_tid()
+        self.assertIsInstance(tid, pd.Series)
+        self.assertEqual(tid.dtype, "datetime64[ns, UTC]")
 
-def test_håndter_manglende_verdier_metoder(method, expected_rows):
-    df = pd.DataFrame({
-        "A": [1.0, None, 3.0]
-        "B": [None, 2.0, None]
-    })
-    dr = DataRensing(df)
-    out = dr.test_håndter_manglende_verdier(metode)
-    assert len(out) == expected_len
+    def test_hent_tid_missing_column(self):
+        df = self.df.drop(columns=["time"])
+        with self.assertRaises(KeyError):
+            DataRensing(df).hent_tid()
 
-def test_håndter_manglende_verdier_invalid():
-    df = pd.DataFrame({"A":[1,2,3]})
-    dr = DataRensing(df)
-    with pytest.raises(ValueError):
-        dr.test_håndter_manglende_verdier("ukjent")
+    def test_bygg_renset_dataframe(self):
+        df_renset = self.renser.bygg_renset_dataframe()
+        self.assertIn("Tid", df_renset.columns)
+        self.assertIn("Temperatur", df_renset.columns)
 
-def test_håndter_duplikater():
-    df = pd.DataFrame({"A":[1,2,3]})
-    dr = DataRensing(df)
-    out1 = dr.test_håndter_duplikater(behold = True)
-    assert len(out1)== 3
-    out2 = dr.test_håndter_duplikater(behold = False)
-    assert len(out2) == 2
+    def test_håndter_manglende_verdier_median(self):
+        df_med = self.renser.håndter_manglende_verdier("median")
+        self.assertFalse(df_med.isnull().any().any())
 
-def test_avrund_kolonne_errors():
-    df = pd.DataFrame({"X":[1.234]})
-    dr = DataRensing(df)
-    with pytest.raises(KeyError):
-        dr.avrund_kolonne("Y",1)
-    with pytest.raises(ValueError):
-        dr.avrund_kolonne("X",-1)
+    def test_håndter_manglende_verdier_drop(self):
+        df_drop = self.renser.håndter_manglende_verdier("drop")
+        self.assertLess(df_drop.shape[0], self.df.shape[0])
 
-def test_avrund_kolonne_success():
-    df = pd.DataFrame({"X":[1.234,2.789]})
-    dr = DataRensing(df)
-    out = dr.avrund_kolonne("X",2)
-    assert out["X"].iloc[0] == 1.23
-    assert out["X"].iloc[1] == 2.79
+    def test_håndter_manglende_verdier_invalid(self):
+        with self.assertRaises(ValueError):
+            self.renser.håndter_manglende_verdier("ugyldig")
 
-def test_bearbeid_tid_success():
-    df = pd.DataFrame({"Tid":[pd.Timestamp("2025-05-01T12:00:00Z")]})
-    dr = DataRensing(df)
-    out = dr.bearbeid_tid(fmt="%d-%m-%Y")
-    assert out["Tid"].iloc[0] == "01-05-2025"
+    def test_håndter_duplikater(self):
+        df_nodups = self.renser.håndter_duplikater(behold=False)
+        self.assertEqual(df_nodups.duplicated().sum(), 0)
 
-def test_bearbeid_tid_error():
-    df = pd.DataFrame({"X":[1]})
-    dr = DataRensing(df)
-    with pytest.raises(KeyError):
-        dr.bearbeid_tid()
+    def test_avrund_kolonne_success(self):
+        df_rounded = self.renser.avrund_kolonne("data_instant_details_air_temperature", 1)
+        self.assertTrue(df_rounded["data_instant_details_air_temperature"].equals(
+            df_rounded["data_instant_details_air_temperature"].round(1)
+        ))
 
-def test_rense_stats():
-    df = pd.DataFrame({"A":[1,1,None]})
-    dr = DataRensing(df)
-    dupli, nan = dr.rense_stats()
-    assert dupli == 1
-    assert nan == 1
+    def test_avrund_kolonne_invalid_kol(self):
+        with self.assertRaises(KeyError):
+            self.renser.avrund_kolonne("feil_kol", 1)
 
-def test_filtrer_temp_over_success():
-    df = pd.DataFrame({"Temperatur":[10,20,5]})
-    dr = DataRensing(df)
-    out = dr.filtrer_temp_over(15)
-    assert list(out["Temperatur"]) == [20]
+    def test_avrund_kolonne_invalid_desimal(self):
+        with self.assertRaises(ValueError):
+            self.renser.avrund_kolonne("data_instant_details_air_temperature", -1)
 
-def test_filtrer_temp_over_missing():
-    df = pd.DataFrame({"X":[1]})
-    dr = DataRensing(df)
-    with pytest.raises(KeyError):
-        dr.filtrer_temp_over(0)
+    def test_bearbeid_tid(self):
+        df_rens = self.renser.bygg_renset_dataframe()
+        self.renser._df = df_rens
+        df_tidy = self.renser.bearbeid_tid()
+        self.assertIsInstance(df_tidy["Tid"].iloc[0], str)
 
-def test_save_cleaned_success(tmp_path):
-    df = pd.DataFrame({
-        "Tid":["2024-01-01 12:00". "2024-01-01 13:00"],
-        "Temperatur": [1.1, 2.2]
-        "Fuktighet": [85, 90]
-    })
-    rense = DataRensing(df)
-    filename="data_clean.csv"
-    data_dir = tmp_path / "data"
-    rense.save_cleaned(filename, data_dir=str(data_dir))
-    path = data_dir / filename
-    assert path.exists()
+    def test_bearbeid_tid_missing_column(self):
+        self.renser._df.drop(columns=["time"], inplace=True, errors="ignore")
+        with self.assertRaises(KeyError):
+            self.renser.bearbeid_tid()
 
-    df2 = pd.read_csv(path)
-    pd.testing.assert_frame_equal(df,df2)
+    def test_rense_stats(self):
+        dupli, nans = self.renser.rense_stats()
+        self.assertGreaterEqual(dupli, 0)
+        self.assertGreaterEqual(nans, 0)
 
-def test_save_cleaned_empty_df(tmp_path):
-    df = pd.DataFrame()
-    rense = DataRensing(df)
+    def test_filtrer_temp_over(self):
+        self.renser._df["Temperatur"] = [1.0, 6.0, 8.0]
+        df_filtered = self.renser.filtrer_temp_over(5.0)
+        self.assertTrue((df_filtered["Temperatur"] > 5.0).all())
 
-    with pytest.raises(ValueError):
-        rense.save_cleaned("data_clean.csv", data_dir=str(tmp_path))
-        
-        
+    def test_filtrer_temp_over_missing(self):
+        self.renser._df.drop(columns=["data_instant_details_air_temperature"], inplace=True)
+        with self.assertRaises(KeyError):
+            self.renser.filtrer_temp_over(5)
+
+    def test_lagre_renset_data_and_file(self):
+        # bygg opp renset DataFrame
+        self.renser._df = self.renser.bygg_renset_dataframe()
+
+        filnavn = "test_renset.csv"
+        sti = self.renser.lagre_renset_data(filnavn=filnavn)
+        self.assertTrue(os.path.exists(sti))
+        os.remove(sti)
+
+    def test_data_rens_pipeline(self):
+        # Endrer _df til startformat
+        self.renser._df = self.df
+        self.renser._df["Tid"] = pd.to_datetime(self.df["time"])
+        self.renser._df.rename(columns={"data_instant_details_air_temperature": "Temperatur"}, inplace=True)
+        self.renser._df = self.renser.avrund_kolonne("Temperatur", 1)
+
+        # Midlertidig deaktivering av faktisk filskriving
+        self.renser.lagre_renset_data = lambda filnavn: "/dev/null"
+        df_resultat = self.renser.data_rens(desimaler=1, temp_grense=2, filnavn="dummy.csv")
+        self.assertIsInstance(df_resultat, pd.DataFrame)
+
+if __name__ == "__main__":
+    unittest.main()

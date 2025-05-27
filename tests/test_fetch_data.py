@@ -1,96 +1,90 @@
-import pytest
+import unittest
+from unittest.mock import patch, MagicMock
+import os
 import pandas as pd
-import requests
 from src.fetch_data import FetchData
 
-class DummyResponse:
-    def __init__(self,json_data,status_code):
-        self._json = json_data
-        self.status_code = status_code
-    def raise_for_status(self):
-        if self.status_code != 200:
-            raise requests.HTTPError(f"status {self.status_code}")
-    def json(self):
-        return self._json
+class TestFetchData(unittest.TestCase):
+    def setUp(self):
+        self.base_url = "https://api.met.no/weatherapi/locationforecast/2.0"
+        self.user_agent = "test-agent@eksempel.com"
+        self.fetcher = FetchData(base_url=self.base_url, user_agent=self.user_agent)
+
+    def test_init_missing_user_agent(self):
+        with patch.dict(os.environ, {"BASE_URL": "https://api", "USER_AGENT": ""}):
+            with self.assertRaises(ValueError):
+                FetchData()
+
+    def test_init_missing_base_url(self):
+        with patch.dict(os.environ, {"BASE_URL": "", "USER_AGENT": "test_agent"}):
+                    with self.assertRaises(ValueError):
+                        FetchData()
+
+    @patch("src.fetch_data.requests.get")
+    def test_hent_data_success(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"key": "value"}
+        mock_response.raise_for_status.return_value = None
+        mock_get.return_value = mock_response
+
+        data = self.fetcher.hent_data(endpoint="compact", params={"lat": 63.4})
+        self.assertEqual(data, {"key": "value"})
+        mock_get.assert_called_once()
+
+    @patch("src.fetch_data.requests.get")
+    def test_hent_data_http_error(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.raise_for_status.side_effect = Exception("404 error")
+        mock_get.return_value = mock_response
+
+        with self.assertRaises(Exception):
+            self.fetcher.hent_data("compact", {"lat": 63.4})
+
+    def test_flat_ut_success(self):
+        nested_json = {
+            "properties": {
+                "timeseries": [
+                    {"time": "2023-01-01", "data": {"instant": {"air_temperature": 4.5}}},
+                    {"time": "2023-01-02", "data": {"instant": {"air_temperature": 2.1}}}
+                ]
+            }
+        }
+        df = self.fetcher.flat_ut(nested_json, "properties.timeseries")
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertIn("time", df.columns)
+
+    def test_flat_ut_missing_key(self):
+        with self.assertRaises(KeyError):
+            self.fetcher.flat_ut({}, "properties.timeseries")
+
+    @patch.object(FetchData, "hent_data")
+    def test_hent_trondheim_forecast(self, mock_hent_data):
+        mock_hent_data.return_value = {
+            "properties": {
+                "timeseries": [{"time": "2023-01-01", "data": {"instant": {"air_temperature": 5}}}]
+            }
+        }
+        df = self.fetcher.hent_trondheim_forecast()
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertIn("time", df.columns)
+
+    @patch.object(FetchData, "hent_trondheim_forecast")
+    def test_lagre_trondheim_forecast(self, mock_forecast):
+        test_df = pd.DataFrame({"time": ["2023-01-01"], "temp": [5]})
+        mock_forecast.return_value = test_df
+
+        df = self.fetcher.lagre_trondheim_forecast()
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertIn("time", df.columns)
+
+        # sjekk at filen faktisk er skrevet ut
+        filsti = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/trondheim_forecast_uncleaned.csv"))
+        self.assertTrue(os.path.exists(filsti))
+
+        # fjern filen etter test
+        os.remove(filsti)
+
+if __name__ == "__main__":
+    unittest.main()
 
 
-def test_init_eampty_base_url():
-    with pytest.raises(ValueError):
-        FetchData(base_url="", user_agent="agent")
-
-def test_init_eampty_user_agent():
-    with pytest.raises(ValueError):
-        FetchData(base_url="https://api.met.no", user_agent="")
-
-
-def test_hent_data_success(monkeypatch):
-    dummy = DummyResponse({"foo":123}, 200)
-    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
-    api = FetchData(base_url="https://api.met.no", user_agent="agent")
-    res = api.hent_data(endpoint="compact", params={"x":1})
-    assert red == {"foo": 123}
-
-def test_hent_data_error(monkeypatch):
-    dummy = DummyResponse(None, 404)
-    monkeypatch.setattr(requests, "get", lambda *args, **kwargs: dummy)
-    api = FetchData(base_url="https://api.met.no", user_agent="agent")
-    with pytest.raises(requests.HTTPError):
-        api.hent_data(endpoint="compact")
-
-
-def flat_ut_success():
-    data = {"properties": {"timeseries": [{"a":1}, {"a":2}]}}
-    api = FetchData(base_url="b", user_agent="u")
-    df = api.flat_ut(data)
-    assert isinstance(df,pd.DataFrame)
-    assert list(df["a"]) == [1, 2]
-
-def flat_ut_error():
-    data = {}
-    api = FetchData(base_url="b", user_agent="u")
-    with pytest.raises(KeyError):
-        api.flat_ut(data)
-
-def test_trondheim_forecast(monkeypatch):
-    sample = {"properties": {"timeseries": [{"x":9}]}}
-    dummy = DummyResponse(sample, 200)
-    monkeypatch.setenv("BASE_URL", "https//api.mey.no/weatherapi/locationforcast/2.0")
-    monkeypatch.setenv("USER_AGENT", "agent")
-    monkeypatchsetattr(requests, "get", lambda *args, **kwargs: dummy)
-    api = FetchData(base_url=os.getenv("BASE_URL"), user_agent=os.getenv("USER_AGENT"))
-    df = api.trondheim_forcast()
-    assert list(df["x"]) == [9]
-
-def test_save_raw_save_and_read(tmp_path):
-    data = {"navn": "Trondheim". "verdier": [1,2,3]}
-    api = FetchData(base_url="https://example.com", user_agent="test-agent")
-    path = tmp_path / "data"
-    filename = "raw_trondheim.json"
-    api.save_raw(data, filename, data_dir=str(path))
-
-    full_path = path / filename
-    assert full_path.exists()
-
-    with open(full_path, "r", encoding="utf-8") as f:
-        loaded = json-load(f)
-    assert loaded == data
-
-def test_save_forecast_success(tmp_path):
-    df = pd.DataFrame({"A": [1,2], "B":[3,4]})
-    api = FetchData(base_url="https://example.com", user_agent="test-agent")
-    path = tmp_path / "data"
-    filename = "raw_trondheim.json"
-    api.save_forecast_csv(df, filename, data_dir=str(path))
-
-    full_path = path / filename
-    assert fuyll_path.exists()
-
-    df2 = pd.read_csv(full_path)
-    pd.testing.assert_frame_equal(df,df2)
-
-def test_save_forecast_empty_df(tmp_path):
-    df = pd.DataFrame()
-    api = FetchData(base_url="https://example.com", user_agent="test-agent")
-    with pytest.raises(ValueError):
-        api.save_forecast_csv(df, "tom.csv", data_dir=str(path))
-        

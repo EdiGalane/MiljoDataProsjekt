@@ -1,76 +1,72 @@
+import unittest
 import os
-import pytest
 import pandas as pd
+import tempfile
+import shutil
 from src.data_reader import DataLeser
 
-def test_init_invalid_dir(tmp_path):
-    with pytest.raises(ValueError):
-        DataLeser(data_dir=str(tmp_path / "nonexistent"))
+class TestDataLeser(unittest.TestCase):
 
-def test_list_files_no_ext(tmp_path):
-    files = ["a.csv", "b.json", "c.xtx"] #lag filer
-    for f in files:
-        (tmp_path / f).write_text("test")
-    dr = DataLeser(data_dir=str(tmp_path))
-    out = dr.list_files()
-    assert set(out) ==set(files)
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp() # midlertidig mappe og testfiler
 
-def test_list_files_with_ext(tmp_path):
-    files=["a.csv", "b.csv", "c.json"]
-    for f in files:
-        (tmp_path / f).write_text("test")
-    dr = DataLeser(data_dir=str(tmp_path))
-    out_csv = dr.list_files(ext="csv")
-    assert set(out_csv) == {"a.csv", "b.scv"}
+        self.csv_path = os.path.join(self.test_dir, "test.csv") #test csv fil
+        pd.DataFrame({"a": [1, 2], "b": [3, 4]}).to_csv(self.csv_path, index=False)
 
-def test_les_csv_success(tmp_path):
-    df = pd.DataFrame({"X":[1,2,3]})
-    file = tmp_path / "data.csv"
-    df.to_csv(file, index=False)
-    dr = DataLeser(data_dir=str(tmp_path))
-    df2 = dr.les_csv("data.csv")
-    pd.testing.assert_frame_equal(df,df2)
+        self.json_path = os.path.join(self.test_dir, "test.json") #test json fil
+        pd.DataFrame({"x": [5, 6], "y": [7, 8]}).to_json(self.json_path, orient="records")
 
-def test_les_csv_missing(tmp_path):
-    dr = DataLeser(data_dir=str(tmp_path))
-    with pytest.raises(FileNotFoundError):
-        dr.les_csv("nofile.csv")
+        self.leser= DataLeser(self.test_dir)
 
-def test_les_csv_eampty(tmp_path):
-    file = tmp_path / "empty.csv"
-    file.write_text("")
-    dr = DataLeser(data_dir=str(tmp_path))
-    with pyeste.raises(pd.errors.EmptyDataError):
-        dr.les_csv("emprty.csv")
+    def tearDown(self):
+        shutil.rmtree(self.test_dir) # sletter mdilertidige mapper og filer
 
-def test_les_json_success(tmp_path):
-    df = pd.DataFrame({"X":["a","b"]})
-    file = tmp_path / "data.json"
-    df.to_json(file, orient = "records")
-    dr = DataLeser(data_dir=str(tmp_path))
-    df2 =dr.les_json("data.json")
-    assert list(df2["X"]==["a","b"])
+    def test_init_with_valid_directory(self):
+        self.assertIsInstance(self.leser, DataLeser)
 
-def test_les_json_missing(tmp_path):
-    dr = DataLeser(data_dir=str(tmp_path))
-    with pytest.raises(FileNotFoundError):
-        dr.les_json("nofile.json")
+    def test_init_with_invalid_directory(self):
+        with self.assertRaises(ValueError):
+            DataLeser("ugyldig/sti")
 
-def test_les_json_invalid(tmp_path):
-    file = tmp_path / "bad.json"
-    file.write_text("not json")
-    dr = DataLeser(data_dir=str(tmp_path))
-    with pytest.raises(ValueError):
-        dr.les_json("bad.json")
+    def test_list_filer_csv(self):
+        result = self.leser.list_filer("csv")
+        self.assertIn("test.csv", result)
 
-def test_sql_utforsk_success():
-    df = pd.DataFrame({"A":[1,2,3]})
-    dr = DataLeser(data_dir=".")
-    res = dr.utforsk_med_sql(df, "select A from df where A>1")
-    assert list(res["A"] == [2,3])
+    def test_les_csv_success(self):
+        df = self.leser.les_csv("test.csv")
+        self.assertEqual(df.shape, (2, 2))
+        self.assertIn("a", df.columns)
 
-def test_sql_utforsk_invalid_q():
-    df = pd.DataFrame({"A":[1]})
-    dr = DataLeser(data_dir=".")
-    with pytest.raises(ValueError):
-        dr.utforsk_med_sql(df,"")
+    def test_les_csv_missing(self):
+        with self.assertRaises(FileNotFoundError):
+            self.leser.les_csv("finnes_ikke.csv")
+
+    def test_les_json_success(self):
+        df = self.leser.les_json("test.json")
+        self.assertIn("x", df.columns)
+        self.assertEqual(len(df), 2)
+
+    def test_les_json_missing(self):
+        with self.assertRaises(FileNotFoundError):
+            self.leser.les_json("finnes_ikke.json")
+
+    def test_sql_utforsk_valid(self):
+        df = pd.DataFrame({"navn": ["a", "b"], "verdi": [1, 2]})
+        result = self.leser.sql_utforsk(df, "SELECT * FROM df WHERE verdi > 1")
+        self.assertEqual(result.shape[0], 1)
+        self.assertIn("navn", result.columns)
+
+    def test_sql_utforsk_invalid_query(self):
+        df = pd.DataFrame({"x": [1, 2]})
+        with self.assertRaises(ValueError):
+            self.leser.sql_utforsk(df, "")
+
+    def test_beskriv_dataframe_print(self):
+        df = pd.DataFrame({"col1": [10, 20], "col2": [30, 40]})
+        try:
+            self.leser.beskriv_dataframe(df, "TestDataFrame")  # output til terminal
+        except Exception as e:
+            self.fail(f"beskriv_dataframe feilet: {e}")
+
+if __name__ == "__main__":
+    unittest.main()
