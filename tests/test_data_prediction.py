@@ -34,17 +34,6 @@ class TestDataPrediksjon(unittest.TestCase):
         self.assertIn("R^2", resultater["Lineær"])
         self.assertIn("RMSE", resultater["Lineær"])
 
-    def test_prediker_ny_data(self):
-        self.pred.tren_lineær_modell()
-        ny_data = self.df.copy()
-        prediksjoner = self.pred.prediker_ny_data(ny_data)
-        self.assertIsInstance(prediksjoner, np.ndarray)
-        self.assertEqual(len(prediksjoner), len(ny_data))
-
-    def test_prediker_uten_trening(self):
-        prediksjoner = self.pred.prediker_ny_data(self.df)
-        self.assertIsNone(prediksjoner)  # Skal printe advarsel og returnere None
-
     def test_visualiseringsgrunnlag(self):
         self.pred.tren_lineær_modell()
         df_vis = self.pred.visualiseringsgrunnlag()

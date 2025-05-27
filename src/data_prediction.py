@@ -87,11 +87,12 @@ class DataPrediksjon:
             self.resultater[navn] = {"R^2": r2, "RMSE": rmse}
         return self.resultater
 
+''' IKKE BRUKT
     def prediker_ny_data(self, ny_df):
         """
         Predikerer nye verdier basert på en DataFrame 
 
-        args:
+        args: 
             ny_df: datasett med samme struktur som treningssettet. (renset_trondheim_forecast)
 
         returns:
@@ -103,6 +104,7 @@ class DataPrediksjon:
 
         X_ny = ny_df.drop(columns=[self.målvariabel, "Tid"], errors="ignore")
         return self.modell.predict(X_ny)
+'''
 
     def visualiseringsgrunnlag(self):
         """
@@ -194,6 +196,7 @@ class DataPrediksjon:
         plt.tight_layout()
         plt.show()
 
+''' IKKE BRUKT
     def scatter_ny_prediksjon(self, ny_df):
         """
         Lager et scatterplot for å sammenligne faktisk og predikert målevariabel i ny data
@@ -219,5 +222,5 @@ class DataPrediksjon:
         plt.legend()
         plt.tight_layout()
         plt.show()
-
+'''
  
