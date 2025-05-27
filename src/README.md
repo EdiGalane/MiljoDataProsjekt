@@ -14,4 +14,10 @@ denne mappen inneholder alle hovedmetoder i modulær struktur. Modulene er organ
     ### .env.example:
     - BASE_URL = https://api.met.no/weatherapi/locationforecast/2.0/
     - USER_AGENT = sett-inn-gyldig-brukeragent-her
-    
+
+
+## KI:
+- Hjelp til nødvendige imports i data_prediction.py
+- Foreslå løsning på lagring av en fil i data mappen (koden laget en data mappe i notebooks og src undermappen)
+- Hjelp til å visualisere tidspunkt i data_prediction.py ('xticks(rotation=45, ha="right")', foreslo å rotere xverdiene for lettere lesing)
+- Forslag til ressurser for å les mer om eskalering av data for data_prediction.py

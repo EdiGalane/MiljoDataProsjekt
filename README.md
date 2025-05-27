@@ -19,3 +19,9 @@ Prosjektet er laget for demonstrasjon av:
 - Modulær kodestruktur som tar i bruk klasser
 - Enhetstesting basert på Unittest metoder 
 - Drøfting av resultater og metoder i Jupyter
+
+
+## KI:
+- Spurte om src undermappen trengte en '__init__.py' fil.
+- Spurte ofte om hjelp få feilmeldinger fra Terminal (når vi kjørte feil syntaks eller kommandoer i Terminal for git)
+- Rettskriving i docstrings eller spurte om kommentaren var god nok basert på 'Sensorveiledning TDT4114'

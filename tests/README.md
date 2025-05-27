@@ -34,3 +34,7 @@ Testene er plassert i "tests/unit/", altså en test fil per src/ modul
 
 samlet kjøring: 
 - kjør kommando "python -m unittest discover tests/" og deretter kjør en etter en fil
+
+## KI:
+- Brukt ChatGPT til å få et eksempel på riktig bruk av '@patch'
+- Brukt ChatGTP til å foreslo skjelletstrukturen til tests mappen. 

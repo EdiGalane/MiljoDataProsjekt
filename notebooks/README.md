@@ -28,3 +28,10 @@ Denne mappen inneholder Jupyter Notebooks som er delt i ulike kategorier for å 
      - Evaluerer ytelse med R2 og RMSE
      - Visualiserer faktisk vs. predikert og feil per dag
    - **Drøfting:** Modellens styrker og svakheter
+
+## KI:
+- Hjelp til markdown av outliers identifisering (fikk ikke til å implementere en formel)
+- Prøvde å få hjelp til hvorfor interaktiv visualisering ikke returnerer noe, den fikk det ikke til. 
+- Prøvde å få hjelp til fjerning av UserWarning i printing av plotts, den fikk det ikke til. 
+- Generere en passende sql_spørring i hent_og_rens.ipynb basert på koden våres fra data_reader.
+- Forslag til hjelp med feilmeldinger.
