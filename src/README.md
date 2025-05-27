@@ -8,3 +8,10 @@ denne mappen inneholder alle hovedmetoder i modulær struktur. Modulene er organ
 - data_cleaner.py: utfører statistisk analyse, beregner korrelasjoner og detekterer outliers.
 - data_vizualisation.py: lager grafiske fremstillinger av atasettet ved bruk av Seaborn og Matplolib metoder.
 - data_prediction.py: trener en lineær modell til å predikere en valgt variabel og evaluerer resultatene ved bruk av R2 og RMSE i tillegg til grafisk sammenligning av faktiske vs predikerte verdier.
+
+# .env:
+- .env ligger i .gitnore, men strukturen er:
+    ### .env.example:
+    - BASE_URL = https://api.met.no/weatherapi/locationforecast/2.0/
+    - USER_AGENT = sett-inn-gyldig-brukeragent-her
+    
