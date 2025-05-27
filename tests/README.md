@@ -38,3 +38,4 @@ samlet kjøring:
 ## KI:
 - Brukt ChatGPT til å få et eksempel på riktig bruk av '@patch'
 - Brukt ChatGTP til å foreslo skjelletstrukturen til tests mappen. 
+- Foreslo et gjenerelt format for laging av negative og positive tester.
