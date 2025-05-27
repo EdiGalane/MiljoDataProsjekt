@@ -87,24 +87,6 @@ class DataPrediksjon:
             self.resultater[navn] = {"R^2": r2, "RMSE": rmse}
         return self.resultater
 
-''' IKKE BRUKT
-    def prediker_ny_data(self, ny_df):
-        """
-        Predikerer nye verdier basert på en DataFrame 
-
-        args: 
-            ny_df: datasett med samme struktur som treningssettet. (renset_trondheim_forecast)
-
-        returns:
-            np.ndarray: predikerte verdier
-        """
-        if self.modell is None:
-            print("Modellen er ikke trent enda")
-            return None
-
-        X_ny = ny_df.drop(columns=[self.målvariabel, "Tid"], errors="ignore")
-        return self.modell.predict(X_ny)
-'''
 
     def visualiseringsgrunnlag(self):
         """
@@ -117,7 +99,9 @@ class DataPrediksjon:
         df_vis = self.X_test.copy()
         df_vis["Faktisk"] = self.y_test.values
         df_vis["Predikert"] = y_pred
-        df_vis["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
+        #df_vis["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
+        df_vis["Dag"] = pd.to_datetime(df_vis["Tid"], format="%Y-%m-%dT%H:%M:%SZ", errors="coerce").dt.date
+
         df_vis["Feil"] = abs(df_vis["Faktisk"] - df_vis["Predikert"])
         df_vis["Dag"] = pd.to_datetime(df_vis["Tid"], errors="coerce").dt.date
         df_vis = df_vis.sort_values(by="Tid")
@@ -196,31 +180,3 @@ class DataPrediksjon:
         plt.tight_layout()
         plt.show()
 
-''' IKKE BRUKT
-    def scatter_ny_prediksjon(self, ny_df):
-        """
-        Lager et scatterplot for å sammenligne faktisk og predikert målevariabel i ny data
-        """
-        if self.modell is None:
-            print("Modulen er ikke trent")
-            return
-        if self.målvariabel not in ny_df.columns:
-            print(f"Nytt datasett mangler {self.målvariabel}")
-
-        X_ny = ny_df.drop(columns=[self.målvariabel, "Tid"], errors="ignore")
-        y_pred = self.modell.predict(X_ny)
-        y_true = ny_df[self.målvariabel].values
-
-        plt.figure(figsize=(8, 6))
-        sns.scatterplot(x=y_true, y=y_pred, alpha=0.7, s=70)
-        plt.plot([min(y_true), max(y_true)], [min(y_true), max(y_true)],
-                color="red", linestyle="--", label="Perfekt prediksjon")
-        plt.xlabel("Faktisk")
-        plt.ylabel("Predikert")
-        plt.title("Faktisk vs Predikert – nye data")
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
-'''
- 
