@@ -66,7 +66,7 @@ class DataAnalyse:
             ValueError: dersom en eller begge kolonner ikke finnes i dataframe
         """
         if kol1 in self.df.columns and kol2 in self.df.columns:
-            return self.df[[kol1,kol2]].corr.iloc[0,1]
+            return self.df[[kol1,kol2]].corr().iloc[0,1]
         else:
             raise ValueError("En eller begge kolonnenavnene finnes ikke i df")
 
@@ -75,7 +75,7 @@ class DataAnalyse:
         identifiserer de radene med verdier "score" over terskelverdiern "threshold"
 
         Args:
-            thresh: terskel for score. default er på 3.0
+            threshold: terskel for score. default er på 3.0
 
         Returns:
             pd.DataFrame: Rader hvor minst en verdi overstiger score terskel.
@@ -98,6 +98,6 @@ class DataAnalyse:
             union: glidende gjennomsnitt som Series
         """
         if kol in self.df.columns:
-            return self.df[kol].rolling(window=vindu).mean()
+            return self.df[kol].rolling(window=vindu, min_periods=1).mean()
         else:
             raise ValueError(f"kolonnen {kol} finnes ikke i df")

@@ -35,7 +35,7 @@ class DataLeser:
             alle = [f for f in alle if f.lower().endswith(f".{ext.lower()}")]
         return alle
 
-    def les_csv(self, filnavn. **kwargs):
+    def les_csv(self, filnavn, **kwargs):
         """
         Leser en CSV-fil fra data_dir til en DataFrame
 
@@ -105,6 +105,6 @@ class DataLeser:
         """
         print(f"\n--- {navn} ---")
         print(f"Antall rader: {df.shape[0]}")
-        print(f"Antall kolonner: {df.hape[1]}")
+        print(f"Antall kolonner: {df.shape[1]}")
         print(f"De 5 første radene:")
         print(df.head(5))

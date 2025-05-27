@@ -17,9 +17,9 @@ class DataRensing:
         Raises:
             TypeError: dersom df ikke er en pandas DataFrame
         """
-        if not isinstance(pd, pd.DataFrame):
+        if not isinstance(df, pd.DataFrame):
             raise TypeError(f"forventet pd.DataFrame, fikk {type(df).__name__}")
-        sekf._df = df.copy() 
+        self._df = df.copy() 
 
     def hent_tid(self):
         """
@@ -136,7 +136,7 @@ class DataRensing:
             def_tmp = df_tmp.dropna(inplace = True)
         elif met == "median":
             for kol in df_tmp.select_dtypes(include=["float","int"]):
-                df_tmp[kol].fillna(df[kol].median(), inplace=True)
+                df_tmp[kol] = df_tmp[kol].fillna(df_tmp[kol].median())
         elif met == "behold":
             pass
         else:
@@ -156,7 +156,7 @@ class DataRensing:
         """
         df_tmp = self._df.copy()
         if not behold:
-            df_tmp = df_tmp.drop_duplicates(inplace = True)
+            df_tmp.drop_duplicates(inplace = True)
         return df_tmp
 
 
@@ -200,7 +200,11 @@ class DataRensing:
         df_tmp = self._df.copy()
         if "Tid" not in df_tmp.columns:
             raise KeyError("Kolonnen mangler for tidsformatering")
-        df_tmp["Tid"] = pd.to_datetime(df_tmp["Tid"]).df.strftime(fmt)
+
+        df_tmp["Tid"] = pd.to_datetime(df_tmp["Tid"], errors="coerce")
+        df_tmp = df_tmp.sort_values("Tid")
+
+        df_tmp["Tid"] = df_tmp["Tid"].dt.strftime(fmt)
         return df_tmp
 
 
@@ -231,7 +235,7 @@ class DataRensing:
             raise KeyError("Kolonnen 'Temperatur' mangler for filtrering")
         return self._df[self._df["Temperatur"] > temp_grense].copy()
 
-    def lagre_renset_data(self, filnavn="trondheim_forecast_cleaned.csv", undermappe="data/csv"):
+    def lagre_renset_data(self, filnavn="trondheim_forecast_cleaned.csv"):
         """
         Lagrer den rensede dataen til data mappen.
 
@@ -241,13 +245,18 @@ class DataRensing:
         """
         if self._df is None or self._df.empty:
             raise ValueError("ingen renset DataFrame tilgjengelig for lagring")
+
+        rotmappe = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        data_dir = os.path.join(rotmappe, "data")
         
-        os.makedirs(undermappe, exist_ok=True)
-        full_sti = os.path.join(undermappe, filnavn)
+        if not os.path.isdir(data_dir):
+            raise FileNotFoundError(f"Mappe 'data/' ble ikke funnet i prosjektroten: {data_dir}")
+
+        full_sti = os.path.join(data_dir, filnavn)
         self._df.to_csv(full_sti, index=False)
         return full_sti
 
-    def data_rens(self, desimaler=1, temp_grense=None, filnavn="trondheim_forecast_cleaned.csv", undermappe="data"):
+    def data_rens(self, desimaler=1, temp_grense=None, filnavn="trondheim_forecast_cleaned.csv", avrund_kol=None):
         """
         Utfører alle metodene for rensing.
 
@@ -257,8 +266,9 @@ class DataRensing:
             filnavn: navn på outputfil
             undermappe: mappen som filen skal lagres til
         """
-        self.df = self.bygg_renset_dataframe()
+        self._df = self.bygg_renset_dataframe()
         print("Ny dataframe bygget")
+        print("Kolonner:", self._df.columns.tolist())
 
         dups, nans = self.rense_stats()
         print(f"Antall duplikater: {dups}, Antall manglende verdier: {nans}")
@@ -289,7 +299,7 @@ class DataRensing:
             pass
         
         try:
-            sti = self.lagre_renset_data(filnavn=filnavn, undermappe=undermappe)
+            sti = self.lagre_renset_data(filnavn=filnavn)
             print(f"Data lagret til {sti}")
         except Exception as e:
             print(f"Feil ved lagring: {e}")

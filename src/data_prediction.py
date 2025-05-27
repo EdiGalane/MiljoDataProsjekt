@@ -27,29 +27,29 @@ class DataPrediksjon:
 
         Args:
             df: renset datasett (Trondheim forecast)
-            målevariabel: kolonnen som skal predikeres
+            målvariabel: kolonnen som skal predikeres
             test_størrelse: andel av data brukt til testing, setter som =0.2
         """
         self.df = df.copy()
 
         if målvariabel not in df.columns:
-            raise ValueError(f"Målevaribelen {målevariabel} finnes ikke")
+            raise ValueError(f"Målevaribelen {målvariabel} finnes ikke")
         
-        self.målevariabel = målevariabel
-        X = self.df.drop(columns=[målevariabel, "Tid"], errors="ignore")
-        y = self.df[målevariabel]
+        self.målvariabel = målvariabel
+        X = self.df.drop(columns=[målvariabel, "Tid"], errors="ignore")
+        y = self.df[målvariabel]
 
         self.kategoriske = X.select_dtypes(include=["object", "category"]).columns.tolist()
-        self.numeriske X.select_dtypes(include=[np.number]).columns.tolist()
+        self.numeriske = X.select_dtypes(include=[np.number]).columns.tolist()
 
         self.preprocessor = ColumnTransformer(
-            transformer=[
+            transformers=[
                 ("num", StandardScaler(), self.numeriske),
                 ("cat", OneHotEncoder(drop="first", handle_unknown="ignore"), self.kategoriske)
             ]
         )
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_sixe=test_størrelse, random_state=42)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=test_størrelse, random_state=42)
 
         self.modeller = {}
         self.resultater = {}
@@ -69,9 +69,10 @@ class DataPrediksjon:
         ])
         modell.fit(self.X_train, self.y_train)
         self.modeller["Lineær"] = modell
+        self.modell = modell
         return modell
 
-    def evaluer_modeller(self):
+    def evaluer_modell(self):
         """
         Evaluerer alle trente modeller på testsettet ved hjelp av r^2 og RMSE
         R^2: Hvor mye variasjon modellen faktisk greier å formidle.
@@ -82,7 +83,7 @@ class DataPrediksjon:
         for navn, modell in self.modeller.items():
             y_pred = modell.predict(self.X_test)
             r2 = r2_score(self.y_test, y_pred)
-            rmse = mean_squared_error(self.y_test, y_pred, squared=False)
+            rmse = np.sqrt(mean_squared_error(self.y_test, y_pred))
             self.resultater[navn] = {"R^2": r2, "RMSE": rmse}
         return self.resultater
 
@@ -100,7 +101,7 @@ class DataPrediksjon:
             print("Modellen er ikke trent enda")
             return None
 
-        X_ny = ny_df.drop(columns=[self.målevariabel, "Tid"], errors="ignore")
+        X_ny = ny_df.drop(columns=[self.målvariabel, "Tid"], errors="ignore")
         return self.modell.predict(X_ny)
 
     def visualiseringsgrunnlag(self):
@@ -114,9 +115,11 @@ class DataPrediksjon:
         df_vis = self.X_test.copy()
         df_vis["Faktisk"] = self.y_test.values
         df_vis["Predikert"] = y_pred
-        df["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
+        df_vis["Tid"] = self.df.loc[self.y_test.index, "Tid"].values if "Tid" in self.df.columns else pd.NaT 
         df_vis["Feil"] = abs(df_vis["Faktisk"] - df_vis["Predikert"])
-        df_vis["Uke"] = pd.to_datetime(df_vis["Tid"], errors="coerce").dt.isocalendar().week
+        df_vis["Dag"] = pd.to_datetime(df_vis["Tid"], errors="coerce").dt.date
+        df_vis = df_vis.sort_values(by="Tid")
+        return df_vis
 
     def visualiser_tidserie(self):
         """
@@ -126,28 +129,95 @@ class DataPrediksjon:
         df_vis = self.visualiseringsgrunnlag()
         if df_vis is None:
             return
-        vis = DataVisualisering(df_vis)
-        vis.plott_tidserie("Faktisk", tittel=f"Faktisk {self.målevariabel} over tid")
-        vis.plott_tidserie("Predikert", tittel=f"Predikert {self.målvariabel} over tid")
+
+        plt.figure(figsize=(10,5))
+
+        plt.plot(df_vis["Tid"], df_vis["Faktisk"], label="Faktisk", linewidth=2)
+        plt.title(f"Faktisk {self.målvariabel} over tid")
+        plt.xlabel("Tid")
+        plt.ylabel(self.målvariabel)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.xticks(rotation=45, ha="right")
+        plt.show()
+
+        plt.figure(figsize=(10,5))
+
+        plt.plot(df_vis["Tid"], df_vis["Predikert"], label="Predikert", linewidth=2, color="red")
+        plt.title(f"Predikert {self.målvariabel} over tid")
+        plt.xlabel("Tid")
+        plt.ylabel(self.målvariabel)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.xticks(rotation=45, ha="right")
+        plt.show()
 
     def visualiser_scatter(self):
         """
         Scatter av faktisk vs predikert verdi.
         Evaluerer nøyaktighet og om prediskjonene den ideelle diagonalen.
         """
-        df_vis = self.lag_visualiseringsgrunnlag()
+        df_vis = self.visualiseringsgrunnlag()
         if df_vis is None:
-            return
-        vis = DataVisualisering(df_vis)
-        vis.plott_scatter("Faktisk", "Predikert", tittel=f"Faktisk vs Predikert")
+            return 
+        
+        plt.figure(figsize=(8,6))
+        sns.scatterplot(data=df_vis, x="Faktisk", y="Predikert", alpha=0.7)
+        plt.plot([df_vis["Faktisk"].min(), df_vis["Faktisk"].max()],
+             [df_vis["Faktisk"].min(), df_vis["Faktisk"].max()],
+             color="red", linestyle="--", label="Perfekt prediksjon")
+        plt.title("Faktisk vs Predikert")
+        plt.xlabel("Faktisk")
+        plt.ylabel("Predikert")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
 
-    def visualiser_feil_pr_uke(self):
+    def visualiser_feil_pr_dag(self):
         """
-        Boxplot som viser fordeling av absolutt prediksjonsfeil per uke. 
+        Boxplot som viser fordeling av absolutt prediksjonsfeil per dag. 
         Innsikt i når modellen predikerer dårligere og virderer stabiliteten over tid.
         """
-        df_vis = self.lag_visualiseringsgrunnlag()
+        df_vis = self.visualiseringsgrunnlag()
         if df_vis is None:
+            return 
+
+        plt.figure(figsize=(10,6))
+        sns.boxplot(data=df_vis, x="Dag", y="Feil")
+        plt.title("Fordeling av prediksjonsfeil per dag")
+        plt.xlabel("Dag")
+        plt.ylabel("Absolutt feil")
+        plt.grid(True, axis="y")
+        plt.tight_layout()
+        plt.show()
+
+    def scatter_ny_prediksjon(self, ny_df):
+        """
+        Lager et scatterplot for å sammenligne faktisk og predikert målevariabel i ny data
+        """
+        if self.modell is None:
+            print("Modulen er ikke trent")
             return
-        vis = DataVisualisering(df_vis)
-        vis.plott_boxplot("Uke", "Feil", tittel=f"Feil per uke – fordeling")
+        if self.målvariabel not in ny_df.columns:
+            print(f"Nytt datasett mangler {self.målvariabel}")
+
+        X_ny = ny_df.drop(columns=[self.målvariabel, "Tid"], errors="ignore")
+        y_pred = self.modell.predict(X_ny)
+        y_true = ny_df[self.målvariabel].values
+
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(x=y_true, y=y_pred, alpha=0.7, s=70)
+        plt.plot([min(y_true), max(y_true)], [min(y_true), max(y_true)],
+                color="red", linestyle="--", label="Perfekt prediksjon")
+        plt.xlabel("Faktisk")
+        plt.ylabel("Predikert")
+        plt.title("Faktisk vs Predikert – nye data")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+ 

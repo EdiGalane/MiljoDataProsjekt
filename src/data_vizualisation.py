@@ -1,5 +1,6 @@
 import pandas as pd
-import matplotlib.pyplot as plot_tidsserie
+import matplotlib.pyplot as plt 
+import matplotlib.image as mpimg
 import seaborn as sns 
 import os
 
@@ -22,20 +23,25 @@ class DataVisualisering:
         if kol not in self.df.columns:
             raise ValueError(f"kolonnen {kol} finnes ikke i datasettet")
         
-        plt.figure(figsize=(10,5))
+        fig = plt.figure(figsize=(10,5))
         plt.plot(self.df[kol], label=kol, linewidth=2)
         plt.title(f"Tidsserie: {kol}")
         plt.xlabel("Tid")
-        plt.ylable(kol)
+        plt.ylabel(kol)
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/tidsserie_{kol}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"tidsserie_{kol}.png")
+            plt.savefig(full_sti)
             plt.close()
+            return None
         else:
-            plt.show()
+            return fig
     
     def plott_sammenheng(self, x, y, vis_outliers, thresh, filnavn=None, save=True):
         """
@@ -52,13 +58,13 @@ class DataVisualisering:
         if x not in self.df.columns or y not in self.df.columns:
             raise ValueError(f"kolonne {x} eller {y} finnes ikke i datasettet")
 
-        plt.figure(figsize=9,6)
+        plt.figure(figsize=(9,6))
 
         if vis_outliers:
             from data_analysis import DataAnalyse
             analyzer = DataAnalyse(self.df)
             outliers = analyzer.identifiser_outliers(thresh)
-            normal = self.drop(index=outliers.index)
+            normal = self.df.drop(index=outliers.index)
 
             # Plot normale datapunkter først (blå)
             sns.scatterplot(data=normal,x=x, y=y, color="navy", alpha=0.7, s=60, label="Normal")
@@ -71,13 +77,17 @@ class DataVisualisering:
 
         plt.title(f"Sammenheng mellom {x} og {y}")
         plt.xlabel(x)
-        plt.ylable(y)
+        plt.ylabel(y)
         plt.grid(True)
         plt.legend()
-        plit.tight_layout()
+        plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/sammenheng_{x}_{y}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"sammenheng_{x}_{y}.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -94,14 +104,18 @@ class DataVisualisering:
             raise ValueError(f"Kolonne {kol} er ikke i datasettet")
         
         plt.figure(figsize=(8,5))
-        sns.histplot(data=self.df, x=col, kde=True, bins=30)
+        sns.histplot(data=self.df, x=kol, kde=True, bins=30)
         plt.title(f"Histogram av {kol}")
         plt.xlabel(kol)
         plt.grid(True)
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/histogram_{kol}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"histogram_{kol}.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -115,20 +129,24 @@ class DataVisualisering:
             verdi: numerisk varaibel
             filnavn: navn på filen
         """
-        if gruppe not in self.df.columns or verdi in self.df.columns:
+        if gruppe not in self.df.columns or verdi not in self.df.columns:
             raise ValueError(f"Kolonne {gruppe} eller {verdi} finnes ikke i datasett")
         
-        plt.figure(figsize=(10,6))
+        fig = plt.figure(figsize=(10,6))
         sns.boxplot(data=self.df, x=gruppe, y=verdi)
         plt.title(f"Fordeling av {verdi} per {gruppe}")
-        pli.grid(True, axis="y")
+        plt.grid(True, axis="y")
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/boxplot_{verdi}_per_{gruppe}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"boxplot_{verdi}_per_{gruppe}.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
-            plt.show()
+            return fig
 
     def plott_korrelasjonsmatrise(self, filnavn=None, save=True):
         """
@@ -138,7 +156,7 @@ class DataVisualisering:
             filnavn: navn på filen
         """
         corr=self.df.corr(numeric_only=True)
-        plt.figure(figsize(10,8))
+        plt.figure(figsize=(10,8))
         sns.heatmap(corr,annot=True,cmap="coolwarm",center=0,linewidths=0.5)
         plt.title("Korrelasjonsmatrise for miljøvaraibler", fontsize=14)
         plt.xticks(rotation=45, ha="right")
@@ -146,7 +164,11 @@ class DataVisualisering:
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/korrelasjonsmatrise.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"korrelasjonsmatrise.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -161,9 +183,14 @@ class DataVisualisering:
         """
         sns.pairplot(self.df, hue=hue)
         plt.suptitle("sammenhenger mellom numeriske variabler", y = 1.02)
+        plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/pairplot_numetriske_verdier.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"pairplot_numetriske_verdier.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -181,7 +208,11 @@ class DataVisualisering:
         sns.jointplot(data=self.df, x=x, y=y, hue=hue, kind="scatter")
 
         if save:
-            plt.savefig(filnavn or f"bilder/scatter&fordeling_{x}_vs_{y}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"scatter&fordeling_{x}_vs_{y}.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -202,13 +233,17 @@ class DataVisualisering:
         plt.figure(figsize=(10,5))
         plt.plot(self.df[kol], label="Rådata", alpha=0.5)
         plt.plot(trend, label=f"{vindu}-dagers glidende gjennomsnitt", linewidth=2)
-        plt.titel(f"Trendanalyse for {kol}")
+        plt.title(f"Trendanalyse for {kol}")
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/trend_vs_rådata_for_{kol}.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"trend_vs_rådata_for_{kol}.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -221,12 +256,17 @@ class DataVisualisering:
         args:
             filnavn: navn på filen
         """
-        import missingno as missingnomsno.matrix(self.df)
+        import missingno as msno
+        msno.matrix(self.df)
         plt.title("Visualiserer manglende verdier")
         plt.tight_layout()
 
         if save:
-            plt.savefig(filnavn or f"bilder/manglende_verdier.png")
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"manglende_verdier.png")
+            plt.savefig(full_sti)
             plt.close()
         else:
             plt.show()
@@ -241,12 +281,15 @@ class DataVisualisering:
             kol: kolonnen som sakl visualiseres.
         """
         from matplotlib.widgets import Slider
+        import numpy as np
 
         # initialiserer figur og akse for plottet
         fig, ax = plt.subplots()
         plt.subplots_adjust(bottom=0.25)
 
         # plott rådata som dtandardlinje
+        y_raw = self.df[kol].values
+        x_vals= np.arange(len(y_raw))
         line, = ax.plot(self.df[kol], label="Rådata", alpha=0.5)
 
         # opprett en tom linje for trend som oppdateres dynamisk
@@ -268,17 +311,56 @@ class DataVisualisering:
             # hver gang slideren flyttes, beregn ny trend og oppdater grafen
             analyzer = DataAnalyse(self.df)
             trend = analyzer.kolonne_trend(kol, vindu=int(val))
-            trend_line.set_data(trend.index, trend) # ny trendlinje med ny data
+            trend_line.set_data(x_vals, trend) # ny trendlinje med ny data
             ax.relim() # tilpass aksene til ny data
             ax.autoscale_view()
             fig.canvas.draw_idle() # tegn plottet på nytt
 
         # vanlig konfig av plottet
+        update(7)
         vindu_slider.on_changed(update)
+
         ax.legend()
         plt.title(f"Interaktiv trendanalyse for {kol}")
         plt.grid(True)
         plt.show()
+
+    def plott_scatter(self, x, y, tittel=None, filnavn=None, save=True):
+        """
+        Plotter et scatterplot mellom to numeriske kolonner.
+
+        Args:
+            x (str): Navn på kolonne for x-akse.
+            y (str): Navn på kolonne for y-akse.
+            tittel (str): Valgfri tittel for plottet.
+            filnavn (str): Valgfri filsti for lagring.
+            save (bool): Hvis True, lagres figuren. Hvis False, vises den.
+        
+        Returns:
+            matplotlib.figure.Figure: Figuren, hvis save=False.
+        """
+        if x not in self.df.columns or y not in self.df.columns:
+            raise ValueError(f"Kolonne {x} eller {y} finnes ikke i datasettet")
+        
+        fig = plt.figure(figsize=(8,6))
+        sns.scatterplot(data=self.df, x=x, y=y, alpha=0.7)
+        plt.title(tittle or f"Scatter: {x} vs {y}")
+        plt.xlabel(x)
+        plt.ylabel(y)
+        plt.grid(True)
+        pli.tight_layout()
+
+        if save:
+            prosjektrot = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            lagringsmappe = os.path.join(prosjektrot, "bilder")
+            os.makedirs(lagringsmappe, exist_ok=True)
+            full_sti = os.path.join(lagringsmappe, f"scatter_{x}_vs_{y}.png")
+            plt.savefig(full_sti)
+            plt.close()
+        else:
+            return fig
+            
+
 
 
 def vis_alle_figurer(bildemappe="bilder", kolonner=2, figur_bredde=6):
@@ -292,22 +374,25 @@ def vis_alle_figurer(bildemappe="bilder", kolonner=2, figur_bredde=6):
         figur_bredde: bredde per figur
     """
     # Hent og sorter alle PNG-filer fra mappen
-    filer = sorted([f for f in os.listdir(bildemappe) if f.lower().endswith(".png")])
+    rotmappe = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    bilder_sti = os.path.join(rotmappe, bildemappe)
+
+    filer = sorted([f for f in os.listdir(bilder_sti) if f.lower().endswith(".png")])
     antall = len(filer)
-    rader = -(antall // kolonner) # Beregn antall rader
+    rader = ((antall+kolonner - 1) // kolonner) # Beregn antall rader
 
     # Opprett subplots-rutenett med riktig størrelse
-    fig, ax = plt.subplots(rader, kolonner, figsize=(figur_bredde * kolonner, figur_bredde * rader *0.75))
+    fig, axs = plt.subplots(rader, kolonner, figsize=(figur_bredde * kolonner, figur_bredde * rader *0.75))
     axs = axs.flatten() if antall > 1 else [axs] # Flat array av akser dersom det er flere plotts
 
     for i, filnavn in enumerate(filer): # Les og vis bilde i korrekt rute
-        img = mpimg.imread(os.path.join(bildemappe, filnavn))
+        img = mpimg.imread(os.path.join(bilder_sti, filnavn))
         axs[i].imshow(img)
-        axs[i].set_title(f"Figur {i+1}: {filnavn.replace("_", " ").replace("png", "")}", fontsize=10)
-        axs[i]axis("off")
+        axs[i].set_title(f"Figur {i+1}: {filnavn.replace("_", " ").replace(".png", "")}", fontsize=10)
+        axs[i].axis("off")
 
-        print(f"\n### Figur {n+1}: {filnavn.replace("_", " ").replace("png", "")}")
-        print(f"![](bilder/{filnavn})")
+        #print(f"\n### Figur {i+1}: {filnavn.replace("_", " ").replace(".png", "")}")
+        #print(f"![](bilder/{filnavn})")
 
     # Slår av tomme ruter hvis det er flere ruteplasser enn bilder
     for j in range(i+1, len(axs)):
@@ -315,3 +400,4 @@ def vis_alle_figurer(bildemappe="bilder", kolonner=2, figur_bredde=6):
     
     plt.tight_layout()
     plt.show()
+
